@@ -2,19 +2,16 @@
   <a-layout-sider
     v-model="collapsed"
   >
-    <div>1</div>
-    <div>1</div>
-    <div>1</div>
-    <div>1</div>
-    <div>1</div>
-    <div>1</div>
+    <logo></logo>
   </a-layout-sider>
 </template>
 
 <script>
+import Logo from '@/components/tools/logo'
 
 export default {
   name: 'side-menu',
+  components: { Logo },
   props: {
     collapsed: {
       type: Boolean,
