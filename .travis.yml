@@ -1,8 +1,8 @@
 language: node_js # 构建所需的语言环境
 node_js:
   - "10"
-  branches:
-    only:
+branches:
+  only:
     - master
 addons:
   ssh_known_hosts:
