@@ -16,4 +16,4 @@ before_deploy:
   - chmod 600 deploy_rsa
   - ssh-add deploy_rsa
 after_success:
-  - rsync -az --delete ./dist/* travis@118.24.15.224:/
+  - rsync -az --delete ./dist/* ubuntu@118.24.15.224:/
