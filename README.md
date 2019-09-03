@@ -1,39 +1,41 @@
-# manage-seed
+# README Boilerplate
 
-## Project setup
-```
-npm install
-```
+A template of README best practices to make your README simple to understand and easy to use. 
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+## Table of Contents
 
-### Compiles and minifies for production
-```
-npm run build
-```
+- [Installation](#installation)
+- [Usage](#usage)
+- [Support](#support)
+- [Contributing](#contributing)
 
-### Run your tests
-```
-npm run test
-```
+## Installation
 
-### Lints and fixes files
-```
-npm run lint
+Download to your project directory, add `README.md`, and commit:
+
+```sh
+curl -LO http://git.io/Xy0Chg
+git add README.md
+git commit -m "Use README Boilerplate"
 ```
 
-### Run your end-to-end tests
-```
-npm run test:e2e
-```
+## Usage
 
-### Run your unit tests
-```
-npm run test:unit
-```
+Replace the contents of `README.md` with your project's:
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+- Name
+- Description
+- Installation instructions
+- Usage instructions
+- Support instructions
+- Contributing instructions
+
+Feel free to remove any sections that aren't applicable to your project.
+
+## Support
+
+Please [open an issue](https://github.com/fraction/readme-boilerplate/issues/new) for support.
+
+## Contributing
+
+Please contribute using [Github Flow](https://guides.github.com/introduction/flow/). Create a branch, add commits, and [open a pull request](https://github.com/fraction/readme-boilerplate/compare/).

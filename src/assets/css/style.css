@@ -1,0 +1,10 @@
+html {
+    font-size: 14px;
+}
+.hello {
+    font-size: 2rem;
+    color: red;
+    width: 100px;
+    height: 100px;
+    background: url('./assets/bridge.png');
+}
