@@ -1,10 +1,11 @@
 const path = require('path');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const VueLoaderPlugin = require('vue-loader/lib/plugin')
 
 module.exports = {
     entry: {
-        app: './src/index.js'
+        app: './src/main.js'
     },
     output: {
         filename: '[name].bundle.js',
@@ -18,6 +19,20 @@ module.exports = {
                     { loader: 'style-loader', options: { injectType: 'linkTag' } },
                     { loader: 'file-loader' }
                 ]
+            },
+            // {
+            //     test: /\.m?js$/,
+            //     exclude: /(node_modules|bower_components)/,
+            //     use: {
+            //         loader: 'babel-loader',
+            //         options: {
+            //             presets: ['@babel/preset-env']
+            //         }
+            //     }
+            // },
+            {
+                test: /\.vue$/,
+                use: ['vue-loader']
             },
             {
                 test: /\.(png|svg|jpg|gif)$/,
@@ -38,6 +53,7 @@ module.exports = {
         new CleanWebpackPlugin(),
         new HtmlWebpackPlugin({
             template: 'src/index.html'
-          })
+        }),
+        new VueLoaderPlugin()
     ]
 };
