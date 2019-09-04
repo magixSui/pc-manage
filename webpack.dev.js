@@ -6,7 +6,15 @@ module.exports = merge(common, {
     mode: 'development',
     devtool: 'inline-source-map',
     devServer: {
-        contentBase: './dist'
+        contentBase: './dist',
+        proxy: {
+            '/api': {
+                target: 'http://localhost:3000/community_manage/',
+                pathRewrite: {'^/api' : ''},
+                changeOrigin: true
+            }
+        },
+        
     },
     plugins: [
         new webpack.NamedModulesPlugin(),
