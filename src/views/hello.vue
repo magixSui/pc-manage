@@ -1,24 +1,72 @@
 <template>
   <div class="hello">
-    <a-table :columns="columns" :dataSource="data">
-      <a slot="name" slot-scope="text" href="javascript:;">{{text}}</a>
-      <span slot="customTitle">
-        <a-icon type="smile-o" />Name
-      </span>
-      <span slot="tags" slot-scope="tags">
-        <a-tag v-for="tag in tags" color="blue" :key="tag">{{tag}}</a-tag>
-      </span>
-      <span slot="action" slot-scope="text, record">
-        <a href="javascript:;">Invite 一 {{record.name}}</a>
-        <a-divider type="vertical" />
-        <a href="javascript:;">Delete</a>
-        <a-divider type="vertical" />
-        <a href="javascript:;" class="ant-dropdown-link">
-          More actions
-          <a-icon type="down" />
-        </a>
+    <a-table :columns="columns"
+    :rowKey="record => record._id"
+    :dataSource="data"
+    :loading="loading"
+    >
+      <template slot="show" slot-scope="show">
+        {{ show }}
+      </template>
+      <span slot="operation" slot-scope="text, record, index">
+        <a-button @click="edit(record)">编辑</a-button>
+        <a-button @click="editProps(record)">属性</a-button>
       </span>
     </a-table>
+    <a-modal
+      :width="720"
+      title="组件配置"
+      :visible="visible"
+      @ok="handleOk"
+      :confirmLoading="confirmLoading"
+      @cancel="handleCancel"
+    >
+      <div class="form-item">
+        <span class="label">显示名称：</span><a-input placeholder="请输入..." v-model="label"/>
+      </div>
+      <div class="form-item">
+        <span class="label">是否显示：</span>
+        <a-radio-group :options="options" @change="onChange" :defaultValue="true" v-model="show"/>
+        <!-- <a-input placeholder="请输入..." v-model="show"/> -->
+      </div>
+      <div class="form-item">
+        <span class="label">组件类型：</span>
+        <a-select :defaultValue="0" style="width: 120px" v-model="type">
+          <a-select-option :value="0">基础</a-select-option>
+          <a-select-option :value="1">高级</a-select-option>
+        </a-select>
+      </div>
+      <div class="form-item">
+        <span class="label">图标：</span><a-input placeholder="请输入..." v-model="icon"/>
+      </div>
+    </a-modal>
+
+    <a-modal
+      :width="720"
+      title="属性配置"
+      :visible="visibleProps"
+      @ok="handlePropsOk"
+      :confirmLoading="propsLoading"
+      @cancel="handlePropsCancel"
+    >
+      <ul v-for="(item, index) in props" :key="index">
+        <li>
+          <div class="prop-item">
+            <span class="label">属性：</span><span>{{item.p_name}}</span>
+          </div>
+          <div class="prop-item">
+            <span class="label">显示名称：</span><a-input placeholder="请输入..." v-model="item.p_label"/>
+          </div>
+          <div class="prop-item">
+            <span class="label">是否显示：</span>
+            <a-radio-group :options="options" :defaultValue="true" v-model="item.p_show"/>
+          </div>
+          <!-- <div class="prop-item">
+            <span class="label">类型：</span><a-input placeholder="请输入..." v-model="label"/>
+          </div> -->
+        </li>
+      </ul>
+    </a-modal>
   </div>
 </template>
 
@@ -29,92 +77,129 @@ import axios from 'axios';
 
 const columns = [
   {
-    dataIndex: "name",
-    key: "name",
-    slots: { title: "customTitle" },
-    scopedSlots: { customRender: "name" }
+    title: '名称',
+    dataIndex: 'label',
   },
   {
-    title: "value",
-    dataIndex: "value",
-    key: "value"
+    title: 'name',
+    dataIndex: 'name'
+  },
+  { 
+    title: '显示',
+    dataIndex: 'show',
+    scopedSlots: { customRender: 'show' },
   },
   {
-    title: "Address",
-    dataIndex: "address",
-    key: "address"
+    title: '图标',
+    dataIndex: 'icon'
   },
   {
-    title: "Tags",
-    key: "tags",
-    dataIndex: "tags",
-    scopedSlots: { customRender: "tags" }
+    title: '类型',
+    dataIndex: 'type',
   },
   {
-    title: "Action",
-    key: "action",
-    scopedSlots: { customRender: "action" }
-  }
+  title: 'operation',
+  key: 'operation',
+  scopedSlots: { customRender: 'operation' },
+}
 ];
 
 export default {
   name: "hello",
   data() {
     return {
-      components: {
-        SdField: {
-          name: "sd-field",
-          props: {},
-          watch: { $props: { immediate: true, deep: true } }
-        },
-        SdButton: {
-          name: "sd-button",
-          props: {},
-          watch: { $props: { immediate: true, deep: true } }
-        },
-        SdText: {
-          name: "sd-text",
-          props: {},
-          watch: { $props: { immediate: true, deep: true } }
-        }
-      },
-      props: [],
+      label: null,
+      show: null,
+      icon: null,
+      type: null,
+      _id: null,
+      options: [{
+        label: '显示', value: true
+      },{
+        label: '不显示', value: false
+      }],
       data: [],
-      columns
+      props: null,
+      columns,
+      loading: false,
+      visible: false,
+      confirmLoading: false,
+      visibleProps: false,
+      propsLoading: false
     };
   },
   mounted() {
-    this.props = Field.props;
-    let arr = [];
-    let queue = [];
-    for (let key in this.components) {
-      arr.push({
-        name: this.components[key].name,
-        value: this.components[key].name
-      });
-    }
+    this.loading = true;
     // 如果需要更新，訪問接口更新存储未上传的组件，否则查询
-    axios.get(uri.component.list,{params: {
-      index: 0,
-      count: 10
-    }}).then(res => {
-      let resultLength = res.data.data.length;
-      if (arr.length !== resultLength) {
-        // TODO 
-      } else {
-        this.data = res.data.data.components;
-      }
-    });
-    // axios.post(uri.component.insertmany, {components: arr}).then(res => {
-    //   console.log(res);
-    // });
+    this.init();
   },
-  methods: {}
+  methods: {
+    init() {
+      axios.get(uri.component.list,{params: {
+        index: 0,
+        count: 10
+      }}).then(res => {
+        this.loading = false;
+        let resultLength = res.data.data.length;
+        this.data = res.data.data.components;
+      });
+    },
+    edit (data) {
+      this.label = data.label;
+      this.icon = data.icon;
+      this.type = data.type;
+      this.show = data.show;
+      this._id = data._id;
+      this.visible = true;
+    },
+    editProps(data) {
+      this.props = data.props;
+      this._id = data._id;
+      this.visibleProps = true;
+    },
+    handleOk() {
+      axios.post(uri.component.edit, {
+        label: this.label,
+        show: this.show,
+        type: this.type,
+        icon: this.icon,
+        _id: this._id
+      }).then(res => {
+        this.init();
+        this.visible = false;
+      });
+    },
+    handleCancel() {
+      this.visible = false;
+    },
+    handlePropsOk() {
+      axios.post(uri.component.editProp, {
+        _id: this._id,
+        props: this.props
+      }).then(res => {
+        this.init();
+        this.visibleProps = false;
+      });
+    },
+    handlePropsCancel() {
+      this.visibleProps = false;
+    },
+    onChange() {
+      console.log(this.show)
+    }
+  }
 };
 </script>
 
-<style>
+<style scoped>
 .hello {
   padding: 2rem;
+}
+.form-item, .prop-item {
+  display:flex;
+  margin-bottom:2rem;
+}
+.form-item .label, .prop-item .label {
+  min-width:120px;
 }
 </style>
